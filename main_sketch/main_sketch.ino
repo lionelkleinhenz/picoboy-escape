@@ -13,7 +13,9 @@ U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI u8g2(U8G2_R0, 10, 8, 9);
 #define LEDG 7  
 #define SPEAKER 15
 
-int miss_trys, cur_time, code, puzzle;
+// penalty represents a time in seconds
+int miss_trys, penalty, code, puzzle;
+uint64_t = start;
 
 void setup() {
   // put your setup code here, to run once:+ 120000
@@ -27,10 +29,10 @@ void setup() {
   digitalWrite(LEDG, LOW);
 
   miss_trys = 0;
-  cur_time = 0;
+  penalty = 0;
   code = 0;
   puzzle = 0;
-
+  start = time_us_64();
 
 
   u8g2.begin();    
@@ -77,8 +79,7 @@ void update_leds() {
 }
 
 void penalty() {
-  int penalty = 120000;
-  cur_time += penalty;
+  penalty += 120;
 }
 
 bool enter(int code) {
@@ -111,4 +112,9 @@ void drawsetup() {
 
 
   u8g2.sendBuffer();  
+}
+
+uint64_t completion_time() {
+  uint64_t end = time_us_u64();
+  return end - start;
 }
