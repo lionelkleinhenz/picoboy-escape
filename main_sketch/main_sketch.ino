@@ -37,6 +37,7 @@ void setup() {
   u8g2.clearBuffer();  
 
   u8g2.sendBuffer();   
+  
 }
 
 void loop() {
@@ -83,4 +84,31 @@ void penalty() {
 bool enter(int code) {
   int solutions[7] = {234, 573, 827, 983, 073, 937, 897}; 
   return code == solutions[puzzle];
+}
+
+void drawsetup() {
+  u8g2.begin();    
+  u8g2.clearBuffer();  
+
+  u8g2.drawLine(2, 0, 2, 63);
+
+  u8g2.setFont(u8g2_font_helvR08_tr);
+
+  
+  u8g2.drawButtonUTF8(55, 0, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "1" );
+  u8g2.drawButtonUTF8(84, 0, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "2" );
+  u8g2.drawButtonUTF8(113, 0, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "3" );
+  u8g2.drawButtonUTF8(55, 19, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "4" );
+  u8g2.drawButtonUTF8(84, 19, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "5" );
+  u8g2.drawButtonUTF8(113, 19, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "6" );
+  u8g2.drawButtonUTF8(55, 38, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "7" );
+  u8g2.drawButtonUTF8(84, 38, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "8" );
+  u8g2.drawButtonUTF8(113, 38, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "9" );
+  u8g2.drawButtonUTF8(55, 57, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "*" );
+  u8g2.drawButtonUTF8(84, 57, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "0" );
+  u8g2.drawButtonUTF8(113, 57, U8G2_BTN_HCENTER|U8G2_BTN_BW2, 20,  2,  2, "<=" );
+
+
+
+  u8g2.sendBuffer();  
 }
