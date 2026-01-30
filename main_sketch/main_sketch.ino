@@ -40,14 +40,17 @@ void setup() {
 }
 
 void loop() {
-
   if (!enter(code)) {
     miss_trys++;
     miss_trys = miss_trys % 4;
     update_leds();
   } else {
     puzzle++;
+  } if (miss_trys == 3) {
+    tone(SPEAKER, 2000, 40);
   }
+  
+  delay(500);
   // put your main code here, to run repeatedly:
 
 }
