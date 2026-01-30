@@ -15,7 +15,7 @@ U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI u8g2(U8G2_R0, 10, 8, 9);
 
 // penalty represents a time in seconds
 int miss_trys, penalty, code, puzzle;
-uint64_t = start;
+uint64_t start;
 
 void setup() {
   // put your setup code here, to run once:+ 120000
@@ -62,7 +62,7 @@ void loop() {
 void update_leds() {
   switch (miss_trys) {
     case 0:
-      penalty();
+      penalty += 120;
       digitalWrite(LEDR, LOW);
       digitalWrite(LEDY, LOW);
       digitalWrite(LEDG, LOW);
@@ -76,10 +76,6 @@ void update_leds() {
     case 3: 
       digitalWrite(LEDR, HIGH);
   }
-}
-
-void penalty() {
-  penalty += 120;
 }
 
 bool enter(int code) {
@@ -115,6 +111,6 @@ void drawsetup() {
 }
 
 uint64_t completion_time() {
-  uint64_t end = time_us_u64();
+  uint64_t end = time_us_64();
   return end - start;
 }
