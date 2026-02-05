@@ -24,6 +24,8 @@ int miss_trys, penalty, code, puzzle;
 uint64_t start;
 int xPos=1;
 int yPos=1;
+int currentlydisplayedpieceofanswer[] = {-1,-1,-1,-1}
+
 int numtable[4][3] = {
 	{1, 2, 3},  
 	{4, 5, 6},
@@ -78,8 +80,10 @@ void loop() {
 	posUpdate();
 	// updateCursor();
 	delay(200);
+	drawtime();
+	displayactivenumber();
+	displaynumberofraezelandemsiegeradearbeiten();
 }
-
 
 void update_leds() {
 	switch (miss_trys) {
@@ -183,7 +187,7 @@ void updateCursor() {
 void drawsetup() {
 	u8g2.begin();    
 	u8g2.clearBuffer();  
-	// u8g2.drawLine(76, 0, 76, 63);
+	u8g2.drawLine(0, 16, 63, 16);
 
 	u8g2.setFont(u8g2_font_helvR08_tr);
 	u8g2.drawButtonUTF8(10, 72, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "1" );
@@ -211,6 +215,31 @@ void drawCursor(int x, int y){
 }
 
 
+void drawtime(){
+	u8g2.setFont(u8g2_font_helvR08_tr);
+	u8g2.setDrawColor(0);
+	u8g2.drawBox(37,3,26,12);
+	u8g2.setDrawColor(1);
+	u8g2.drawStr(37,15,"00:10");
+	u8g2.sendBuffer(); 
+}
+
+
+void displaynumberofraezelandemsiegeradearbeiten(){
+	u8g2.setFont(u8g2_font_helvR08_tr);
+	u8g2.setDrawColor(0);
+	u8g2.drawBox(0,3,26,12);
+	u8g2.setDrawColor(1);
+	u8g2.drawStr(0,15,"R4");
+	u8g2.sendBuffer(); 
+}
+
+void displayactivenumber(){
+	u8g2.setFont( u8g2_font_logisoso24_tf);
+	u8g2.setDrawColor(1);
+	u8g2.drawStr(2,50,"0000");
+	u8g2.sendBuffer(); 
+}
 
 
 uint64_t completion_time() {
