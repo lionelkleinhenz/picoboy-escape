@@ -1,5 +1,6 @@
 #include <U8g2lib.h>
 #include <SPI.h>
+#include <sstream>
 
 
 
@@ -55,6 +56,8 @@ void setup() {
 	cursorPos = 0;
 	start = time_us_64();
 	drawsetup();
+
+	
 	
 	
 }
@@ -78,6 +81,7 @@ void loop() {
 	posUpdate();
 	// updateCursor();
 	delay(200);
+	readable(completion_time());
 }
 
 
@@ -216,4 +220,47 @@ void drawCursor(int x, int y){
 uint64_t completion_time() {
 	uint64_t end = time_us_64();
 	return end - start;
+}
+
+void readable(uint64_t val) {
+	uint64_t seconds = val / 1000000;
+	uint64_t seconds_mod = seconds % 60;
+	uint64_t minutes = seconds / 60;
+  char final[8];
+	char sec[2];
+	char min[3];
+	if (minutes >= 1000) {
+		// error screen
+	} else {
+		sprintf(min, "%llu", minutes);
+	}
+	// sprintf(min, "%llu", minutes);
+	sprintf(sec, "%llu", seconds_mod);
+	for (int i = 0; i < 3; i++) {
+		if (min[2 - i] == NULL) {
+			final[i] = '0';
+		} else {
+			final[i] = min[2 - i];
+		}
+	}
+	final[3] = ':';
+	final[4] = ':';
+	if (sec[1] == NULL) {
+		final[5] = '0';
+		final[6] = sec[0];
+	} else {
+		final[5] = sec[0];
+		final[6] = sec[1];
+	}
+	const char* ptr = final;
+	
+	// char* concatenated = strcat(strcat(strcat(strcat(output, min_string), min_symbol), sec_string), sec_symbol);
+	// Serial.begin(0);
+	// Serial.println(min[1] == NULL);
+	Serial.println(final);
+	u8g2.setDrawColor(0);
+	u8g2.drawBox(28, 0, 36, 10);
+	u8g2.setDrawColor(1);
+  u8g2.drawStr(28, 10, final);
+	u8g2.sendBuffer();
 }
