@@ -74,9 +74,9 @@ void loop() {
 	
 	delay(500);
 	*/
-	updateCursor();
+	// updateCursor();
 	posUpdate();
-	updateCursor();
+	// updateCursor();
 	delay(200);
 }
 
@@ -137,22 +137,30 @@ void posUpdate() {
 
 	if (digitalRead(KEY_LEFT) == LOW) {
 		if ((cursorPos / 3) > 0) {
+			updateCursor();
 			cursorPos -= 3;
+			updateCursor();
 		}
 	}
 	if (digitalRead(KEY_RIGHT) == LOW) {
 		if ((cursorPos / 3) < 3) {
+			updateCursor();
 			cursorPos += 3;
+			updateCursor();
 		}
 	}
 	if (digitalRead(KEY_DOWN) == LOW) {
 		if ((cursorPos % 3) > 0) {
+			updateCursor();
 			cursorPos -= 1;
+			updateCursor();
 		}
 	}
 	if (digitalRead(KEY_UP) == LOW) {
 		if ((cursorPos % 3) < 2) {
+			updateCursor();
 			cursorPos += 1;
+			updateCursor();
 		}
 	}
 	// updateCursor();
