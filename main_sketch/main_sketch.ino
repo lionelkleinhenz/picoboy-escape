@@ -85,7 +85,7 @@ void loop() {
 	delay(200);
 	drawtime();
 	displayactivenumber();
-	displaynumberofraezelandemsiegeradearbeiten();
+	displaycurrentpuzzle();
 }
 
 void update_leds() {
@@ -221,14 +221,14 @@ void drawCursor(int x, int y){
 void drawtime(){
 	u8g2.setFont(u8g2_font_helvR08_tr);
 	u8g2.setDrawColor(0);
-	u8g2.drawBox(28 + fast_run,0,36,15);
+	u8g2.drawBox(36,0,28,15);
 	u8g2.setDrawColor(1);
 	readable(time_elapsed());
 	u8g2.sendBuffer(); 
 }
 
 
-void displaynumberofraezelandemsiegeradearbeiten(){
+void displaycurrentpuzzle(){
 	u8g2.setFont(u8g2_font_helvR08_tr);
 	u8g2.setDrawColor(0);
 	u8g2.drawBox(0,3,20,12);
@@ -247,48 +247,46 @@ void displayactivenumber(){
 
 uint64_t time_elapsed() {
 	uint64_t end = time_us_64();
-	return end - start;
+	return (3600000000) - (end - start) + penalty * 1000000;
 }
 
 void readable(uint64_t val) {
 	uint64_t seconds = val / 1000000;
 	uint64_t seconds_mod = seconds % 60;
 	uint64_t minutes = seconds / 60;
-  char final[8];
+	Serial.println(minutes);
+	Serial.println(seconds);
+	Serial.println(val);
+  char final[5];
 	char sec[2];
-	char min[4];
-	if (minutes >= 1000) {
-		// error screen
+	char min[2];
+	sprintf(min, "%llu", minutes);
+	if (min[1] == NULL) {
+		final[0] = '0';
+		final[1] = min[0];
 	} else {
-		sprintf(min, "%llu", minutes);
-		Serial.println(min);
-		for (int i = 0; i < 3; i++) {
-			Serial.print(min[2 - i]);
-			Serial.println(i);
-			if (min[2 - i] == NULL || min[2 - i] == '') {
-				final[i] = '0';
-			} else {
-				final[i] = min[2 - i];
-			}
-		}
+		final[0] = min[0];
+		final[1] = min[1];
 	}
 	// sprintf(min, "%llu", minutes);
 	sprintf(sec, "%llu", seconds_mod);
-	
-
-	final[3] = ':';
-	final[4] = ':';
+	final[2] = ':';
 	if (sec[1] == NULL) {
-		final[5] = '0';
-		final[6] = sec[0];
+		final[3] = '0';
+		final[4] = sec[0];
 	} else {
-		final[5] = sec[0];
-		final[6] = sec[1];
+		final[3] = sec[0];
+		final[4] = sec[1];
 	}
-	const char* ptr = final;
+	char temp[10]; // it works
+	temp[0] = final[0];
+	temp[1] = final[1];
+	temp[2] = final[2];
+	temp[3] = final[3];
+	temp[4] = final[4];
+	Serial.println(temp);
 	
 	// char* concatenated = strcat(strcat(strcat(strcat(output, min_string), min_symbol), sec_string), sec_symbol);
 	// Serial.begin(0);
-	Serial.println(final);
-  u8g2.drawStr(28, 15, final);
+  u8g2.drawStr(36, 15, final);
 }
