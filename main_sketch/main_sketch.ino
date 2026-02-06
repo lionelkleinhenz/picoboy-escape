@@ -17,23 +17,19 @@ U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI u8g2(U8G2_R3, 10, 8, 9);
 #define KEY_DOWN 3
 #define KEY_LEFT 4
 #define KEY_UP 1
+#define KEY_CENTER 0
 
 
 
 // penalty represents a time in seconds
 int miss_trys, penalty, code, puzzle;
-uint64_t start;
+uint64_t game_start;
 int xPos=1;
 int yPos=1;
-int currentlydisplayedpieceofanswer[] = {-1,-1,-1,-1};
+char currentlydisplayedpieceofanswer[] = {'*','*','*','*'};
 
-int numtable[4][3] = {
-	{1, 2, 3},  
-	{4, 5, 6},
-	{7, 8, 9},
-	{10, 0, 11}
-};
 int cursorPos;
+int currentdigit=0;
 
 
 void setup() {
@@ -56,13 +52,14 @@ void setup() {
 	code = 0;
 	puzzle = 0;
 	cursorPos = 0;
-	start = time_us_64();
+	game_start = time_us_64();
 	drawsetup();
 
 	
 	
 	
 }
+
 
 void loop() {
 
@@ -84,7 +81,7 @@ void loop() {
 	// updateCursor();
 	delay(200);
 	drawtime();
-	displayactivenumber();
+	//displayactivenumber();
 	displaycurrentpuzzle();
 }
 
@@ -113,78 +110,58 @@ bool enter(int code) {
 }
 
 
-void check(){
-	if (digitalRead(KEY_UP) == LOW) {
-		drawCursor(xPos, yPos);
-		yPos = yPos - 1;
-		drawCursor(xPos, yPos);
-		delay(200);
-	}
-	if (digitalRead(KEY_DOWN) == LOW) {
-		drawCursor(xPos, yPos);
-		yPos = yPos + 1;
-		drawCursor(xPos, yPos);
-		delay(200);
-	}
-	if (digitalRead(KEY_LEFT) == LOW) {
-		drawCursor(xPos, yPos);
-		xPos = xPos - 1;
-		drawCursor(xPos, yPos);
-		delay(200);
-	}
-	if (digitalRead(KEY_RIGHT) == LOW) {
-		drawCursor(xPos, yPos);
-		xPos = xPos + 1;
-		drawCursor(xPos, yPos);
-		delay(200);
-	}
-}
+
 
 void posUpdate() {
 
 	if (digitalRead(KEY_LEFT) == LOW) {
 		if ((cursorPos / 3) > 0) {
-			updateCursor();
+			drawCursor();
 			cursorPos -= 3;
-			updateCursor();
+			drawCursor();
 		}
 	}
 	if (digitalRead(KEY_RIGHT) == LOW) {
 		if ((cursorPos / 3) < 3) {
-			updateCursor();
+			drawCursor();
 			cursorPos += 3;
-			updateCursor();
+			drawCursor();
 		}
 	}
 	if (digitalRead(KEY_DOWN) == LOW) {
 		if ((cursorPos % 3) > 0) {
-			updateCursor();
+			drawCursor();
 			cursorPos -= 1;
-			updateCursor();
+			drawCursor();
 		}
 	}
 	if (digitalRead(KEY_UP) == LOW) {
 		if ((cursorPos % 3) < 2) {
-			updateCursor();
+			drawCursor();
 			cursorPos += 1;
-			updateCursor();
+			drawCursor();
 		}
+	}
+	if (digitalRead(KEY_CENTER) == LOW) {
+		currentlydisplayedpieceofanswer[currentdigit] = '#';
+		displayactivenumber();
+		delay(200);
+
+		
 	}
 	// updateCursor();
 	// delay(200);
 }
 
-int lookuptable(int x, int y){
-  return numtable[y][x];
-}
 
-void updateCursor() {
-	u8g2.setDrawColor(2);
-	int x = cursorPos % 3;
-	int y = cursorPos / 3;
-	u8g2.drawBox(1+x*22, 63+y*16, 18, 12);
-	u8g2.setDrawColor(1);
-	u8g2.sendBuffer();  
+char recalc(){
+	int c = cursorPos + 1;
+
+
+	char m = c + '0';
+	return cursorPos;
+
+
 }
 
 void drawsetup() {
@@ -207,12 +184,12 @@ void drawsetup() {
 	u8g2.drawButtonUTF8(54, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "<=" );
 
 	u8g2.sendBuffer();  
-	updateCursor();
+	drawCursor();
 }
 
-void drawCursor(int x, int y){
+void drawCursor(){
 	u8g2.setDrawColor(2);
-	u8g2.drawBox(80+x*17, 2+y*16, 13, 12);
+	u8g2.drawBox(1+cursorPos % 3*22, 63+cursorPos / 3*16, 18, 12);
 	u8g2.setDrawColor(1);
 	u8g2.sendBuffer();  
 }
@@ -223,7 +200,7 @@ void drawtime(){
 	u8g2.setDrawColor(0);
 	u8g2.drawBox(36,0,28,15);
 	u8g2.setDrawColor(1);
-	readable(time_elapsed());
+	readable(time_elapsed(game_start));
 	u8g2.sendBuffer(); 
 }
 
@@ -238,19 +215,28 @@ void displaycurrentpuzzle(){
 }
 
 void displayactivenumber(){
+	
+	digitalWrite(LEDY, HIGH);
+	u8g2.setDrawColor(0);
+	u8g2.drawBox(0,22,64,30);
 	u8g2.setFont(u8g2_font_logisoso24_tf);
 	u8g2.setDrawColor(1);
-	u8g2.drawStr(2,50,"0000");
+	u8g2.drawStr(2,50,currentlydisplayedpieceofanswer);
 	u8g2.sendBuffer(); 
+	currentdigit++;
 }
 
 
-uint64_t time_elapsed() {
+uint64_t time_elapsed(uint64_t start) {
 	uint64_t end = time_us_64();
-	return (3600000000) - (end - start) + penalty * 1000000;
+	uint64_t time_played = end - start;
+	return 3600000000 - time_played;
 }
 
 void readable(uint64_t val) {
+	if (val > 3600000000) {
+		gameoverscreen();
+	}
 	uint64_t seconds = val / 1000000;
 	uint64_t seconds_mod = seconds % 60;
 	uint64_t minutes = seconds / 60;
@@ -278,7 +264,7 @@ void readable(uint64_t val) {
 		final[3] = sec[0];
 		final[4] = sec[1];
 	}
-	char temp[10]; // it works
+	char temp[10]; // it works; don't EVER question it 
 	temp[0] = final[0];
 	temp[1] = final[1];
 	temp[2] = final[2];
@@ -286,7 +272,21 @@ void readable(uint64_t val) {
 	temp[4] = final[4];
 	Serial.println(temp);
 	
-	// char* concatenated = strcat(strcat(strcat(strcat(output, min_string), min_symbol), sec_string), sec_symbol);
-	// Serial.begin(0);
   u8g2.drawStr(36, 15, final);
 }
+
+void gameoverscreen() {
+
+}
+
+void penaltyscreeen(uint64_t penalty) {
+	uint64_t penalty_start = time_us_64();
+	uint64_t time = time_elapsed(penalty_start);
+	uint64_t time_remaining = penalty - time;
+	while (time < penalty) {
+		time = time_elapsed(penalty_start);
+		time_remaining = penalty - time;
+		delay(200);
+	}
+}
+
