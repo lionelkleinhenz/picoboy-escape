@@ -57,8 +57,8 @@ void setup() {
 	game_start = time_us_64();
 	drawsetup();
 
-
-	penaltyscreen(30 * 1000000);
+	// informationscreen(1);
+	// penaltyscreen(30 * 1000000);
 
 	
 }
@@ -315,6 +315,7 @@ void penaltyscreen(uint64_t penalty) {
 	rem_penalty_sec[0] = '3';
 	rem_penalty_sec[1] = '0';
 	rem_penalty_sec[2] = 's';
+	u8g2.setFont(u8g2_font_helvR08_tr);
 	u8g2.drawStr(5, 40, "Verbleibende");
 	u8g2.drawStr(10, 50, "Zeitstrafe:");
 	u8g2.setDrawColor(0);
@@ -341,16 +342,42 @@ void penaltyscreen(uint64_t penalty) {
 			}
 		u8g2.setDrawColor(0);
 		u8g2.drawBox(0, 56, 64, 40);
-		u8g2.setFont(u8g2_font_logisoso24_tf);
 		u8g2.setDrawColor(1);
 		u8g2.drawStr(10, 80, rem_penalty_sec);
 		u8g2.sendBuffer();
 		delay(200);
 	}
 	u8g2.clearBuffer();
+	u8g2.setFont(u8g2_font_helvR08_tr);
 	u8g2.sendBuffer();
 	drawsetup();
 	displayactivenumber();
 	
+}
+
+void informationscreen(int room) {
+	char rooms[5][5] = {"207", "LIFT", "305", "402", "112"};
+	u8g2.clearBuffer();
+	u8g2.sendBuffer();
+	u8g2.drawStr(2, 50, "Neuer Raum:");
+	u8g2.setFont(u8g2_font_logisoso16_tf);
+	u8g2.drawStr(16 ,70, rooms[room]);
+	u8g2.setFont(u8g2_font_helvR08_tr);
+	u8g2.drawButtonUTF8(32, 90, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "Weiter!");
+	u8g2.setDrawColor(2);
+	u8g2.drawBox(15, 81, 33, 12);
+	u8g2.setDrawColor(1);
+	u8g2.sendBuffer(); 
+	u8g2.sendBuffer();
+	while (true) {
+		if (digitalRead(KEY_CENTER) == LOW) {
+			break;
+		}
+	}
+	u8g2.sendBuffer();
+	u8g2.clearBuffer();
+	u8g2.sendBuffer();
+	drawsetup();
+	displayactivenumber();
 }
 
