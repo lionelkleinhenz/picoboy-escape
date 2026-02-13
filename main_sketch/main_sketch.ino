@@ -27,9 +27,10 @@ uint64_t game_start;
 int xPos=1;
 int yPos=1;
 char currentlydisplayedpieceofanswer[] = {'*','*','*','*'};
-
+char lockuptable[] = {'1','2','3','4','5','6','7','8','9','q','0','e'};
 int cursorPos;
 int currentdigit=0;
+int r = 1;
 
 
 void setup() {
@@ -82,7 +83,6 @@ void loop() {
 	// updateCursor();
 	delay(200);
 	drawtime();
-	//displayactivenumber();
 	displaycurrentpuzzle();
 }
 
@@ -144,16 +144,38 @@ void posUpdate() {
 		}
 	}
 	if (digitalRead(KEY_CENTER) == LOW) {
-		currentlydisplayedpieceofanswer[currentdigit] = '#';
-		displayactivenumber();
-		delay(200);
 
-		
+		if (lockuptable[cursorPos]=='q'){
+			currentdigit--;
+			currentlydisplayedpieceofanswer[currentdigit] = '*';
+			displayactivenumber();
+		}
+		else if(lockuptable[cursorPos]=='e'){
+			verify();
+			currentdigit = 0;
+    	currentlydisplayedpieceofanswer[0] = '*';
+   	  currentlydisplayedpieceofanswer[1] = '*';
+   	  currentlydisplayedpieceofanswer[2] = '*';
+   	  currentlydisplayedpieceofanswer[3] = '*';
+			displayactivenumber();
+			r++;
+		}
+		else {
+			currentlydisplayedpieceofanswer[currentdigit] = lockuptable[cursorPos];
+			displayactivenumber();
+			currentdigit++;
+			if(currentdigit > 4){
+				currentdigit = 4;
+			}
+		}
 	}
+
 	// updateCursor();
 	// delay(200);
 }
+void verify(){
 
+}
 
 char recalc(){
 	int c = cursorPos + 1;
@@ -210,8 +232,12 @@ void displaycurrentpuzzle(){
 	u8g2.setFont(u8g2_font_helvR08_tr);
 	u8g2.setDrawColor(0);
 	u8g2.drawBox(0,3,20,12);
-	u8g2.setDrawColor(1);
-	u8g2.drawStr(0,15,"R4");
+	u8g2.setDrawColor(1);  
+	char t[3];
+  t[0] = 'R';
+  t[1] = '0' + r;
+  t[2] = '\0';
+  u8g2.drawStr(0,15, t);
 	u8g2.sendBuffer(); 
 }
 
@@ -223,7 +249,6 @@ void displayactivenumber(){
 	u8g2.setDrawColor(1);
 	u8g2.drawStr(2,50,currentlydisplayedpieceofanswer);
 	u8g2.sendBuffer(); 
-	currentdigit++;
 }
 
 
