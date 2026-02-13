@@ -42,6 +42,7 @@ void setup() {
 	pinMode(KEY_DOWN, INPUT_PULLUP);
 	pinMode(KEY_LEFT, INPUT_PULLUP);
 	pinMode(KEY_UP, INPUT_PULLUP);
+	pinMode(KEY_CENTER, INPUT_PULLUP);
 
 	digitalWrite(LEDR, LOW);
 	digitalWrite(LEDY, LOW);
@@ -55,14 +56,14 @@ void setup() {
 	game_start = time_us_64();
 	drawsetup();
 
-	
-	
+
+	penaltyscreen(30 * 1000000);
+
 	
 }
 
 
 void loop() {
-
 	/*
 	if (!enter(code)) {
 		miss_trys++;
@@ -200,7 +201,7 @@ void drawtime(){
 	u8g2.setDrawColor(0);
 	u8g2.drawBox(36,0,28,15);
 	u8g2.setDrawColor(1);
-	readable(time_elapsed(game_start));
+	readable(3600000000 - time_elapsed(game_start));
 	u8g2.sendBuffer(); 
 }
 
@@ -216,7 +217,6 @@ void displaycurrentpuzzle(){
 
 void displayactivenumber(){
 	
-	digitalWrite(LEDY, HIGH);
 	u8g2.setDrawColor(0);
 	u8g2.drawBox(0,22,64,30);
 	u8g2.setFont(u8g2_font_logisoso24_tf);
@@ -230,7 +230,7 @@ void displayactivenumber(){
 uint64_t time_elapsed(uint64_t start) {
 	uint64_t end = time_us_64();
 	uint64_t time_played = end - start;
-	return 3600000000 - time_played;
+	return time_played;
 }
 
 void readable(uint64_t val) {
@@ -240,9 +240,9 @@ void readable(uint64_t val) {
 	uint64_t seconds = val / 1000000;
 	uint64_t seconds_mod = seconds % 60;
 	uint64_t minutes = seconds / 60;
-	Serial.println(minutes);
-	Serial.println(seconds);
-	Serial.println(val);
+	// Serial.println(minutes);
+	// Serial.println(seconds);
+	// Serial.println(val);
   char final[5];
 	char sec[2];
 	char min[2];
@@ -270,7 +270,8 @@ void readable(uint64_t val) {
 	temp[2] = final[2];
 	temp[3] = final[3];
 	temp[4] = final[4];
-	Serial.println(temp);
+	Serial.println(temp); // DO NOT REMOVE
+	// Serial.println(final);
 	
   u8g2.drawStr(36, 15, final);
 }
@@ -279,14 +280,52 @@ void gameoverscreen() {
 
 }
 
-void penaltyscreeen(uint64_t penalty) {
+void penaltyscreen(uint64_t penalty) {
+	u8g2.clearBuffer();
+	u8g2.sendBuffer();
 	uint64_t penalty_start = time_us_64();
 	uint64_t time = time_elapsed(penalty_start);
-	uint64_t time_remaining = penalty - time;
+	uint64_t time_remaining = (penalty - time) / 1000000;
+	char rem_penalty_sec[3];
+	rem_penalty_sec[0] = '3';
+	rem_penalty_sec[1] = '0';
+	rem_penalty_sec[2] = 's';
+	u8g2.drawStr(5, 40, "Verbleibende");
+	u8g2.drawStr(10, 50, "Zeitstrafe:");
+	u8g2.setDrawColor(0);
+	u8g2.drawBox(0, 56, 64, 40);
+	u8g2.setFont(u8g2_font_logisoso24_tf);
+	u8g2.setDrawColor(1);
+	u8g2.drawStr(10 ,80, rem_penalty_sec);
+	u8g2.sendBuffer();
 	while (time < penalty) {
 		time = time_elapsed(penalty_start);
-		time_remaining = penalty - time;
+		time_remaining = (penalty - time) / 1000000;
+		if (time_remaining > penalty / 1000000) {
+			break;
+		}
+		// Serial.println(time_remaining);
+		char rem[2];
+		sprintf(rem, "%llu", time_remaining);
+			if (rem[1] == NULL) {
+				rem_penalty_sec[0] = '0';
+				rem_penalty_sec[1] = rem[0];
+			} else {
+				rem_penalty_sec[0] = rem[0];
+				rem_penalty_sec[1] = rem[1];
+			}
+		u8g2.setDrawColor(0);
+		u8g2.drawBox(0, 56, 64, 40);
+		u8g2.setFont(u8g2_font_logisoso24_tf);
+		u8g2.setDrawColor(1);
+		u8g2.drawStr(10, 80, rem_penalty_sec);
+		u8g2.sendBuffer();
 		delay(200);
 	}
+	u8g2.clearBuffer();
+	u8g2.sendBuffer();
+	drawsetup();
+	displayactivenumber();
+	
 }
 
