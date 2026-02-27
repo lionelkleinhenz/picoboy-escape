@@ -30,7 +30,6 @@ char currentlydisplayedpieceofanswer[] = {'*','*','*','*'};
 char lockuptable[] = {'1','2','3','4','5','6','7','8','9','q','0','e'};
 int cursorPos;
 int currentdigit=0;
-int r = 1;
 
 
 void setup() {
@@ -158,7 +157,6 @@ void posUpdate() {
    	  currentlydisplayedpieceofanswer[2] = '*';
    	  currentlydisplayedpieceofanswer[3] = '*';
 			displayactivenumber();
-			r++;
 		}
 		else {
 			currentlydisplayedpieceofanswer[currentdigit] = lockuptable[cursorPos];
@@ -174,7 +172,17 @@ void posUpdate() {
 	// delay(200);
 }
 void verify(){
+	char codes[][4] = {{'5', '2', '0', '0'}, {'4', '2', '3', '8'}, {'5', '2', '0', '0'}, {'5', '2', '0', '0'}, {'7', '7', '8', '3'}};
+	if (codes[puzzle] == currentlydisplayedpieceofanswer) {
+		informationscreen();
+		if (puzzle >= 5) {
+			// winscreen();
+		}
+		puzzle++;
+	} else {
+		penaltyscreen(30 * 1000000);
 
+	}
 }
 
 char recalc(){
@@ -235,7 +243,7 @@ void displaycurrentpuzzle(){
 	u8g2.setDrawColor(1);  
 	char t[3];
   t[0] = 'R';
-  t[1] = '0' + r;
+  t[1] = '0' + puzzle;
   t[2] = '\0';
   u8g2.drawStr(0,15, t);
 	u8g2.sendBuffer(); 
@@ -355,13 +363,13 @@ void penaltyscreen(uint64_t penalty) {
 	
 }
 
-void informationscreen(int room) {
+void informationscreen() {
 	char rooms[5][5] = {"207", "LIFT", "305", "402", "112"};
 	u8g2.clearBuffer();
 	u8g2.sendBuffer();
 	u8g2.drawStr(2, 50, "Neuer Raum:");
 	u8g2.setFont(u8g2_font_logisoso16_tf);
-	u8g2.drawStr(16 ,70, rooms[room]);
+	u8g2.drawStr(16 ,70, rooms[puzzle]);
 	u8g2.setFont(u8g2_font_helvR08_tr);
 	u8g2.drawButtonUTF8(32, 90, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "Weiter!");
 	u8g2.setDrawColor(2);
