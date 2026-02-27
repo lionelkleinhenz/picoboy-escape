@@ -172,13 +172,18 @@ void posUpdate() {
 	// delay(200);
 }
 void verify(){
-	char codes[][4] = {{'5', '2', '0', '0'}, {'4', '2', '3', '8'}, {'5', '2', '0', '0'}, {'5', '2', '0', '0'}, {'7', '7', '8', '3'}};
-	if (codes[puzzle] == currentlydisplayedpieceofanswer) {
-		informationscreen();
-		if (puzzle >= 5) {
+	char codes[][4] = {{'5', '2', '0', '0'}, {'4', '2', '3', '8'}, {'0', '4', '1', '3'}, {'x', 'x', 'x', 'x'}, {'7', '7', '8', '3'}, {'4', '8', '2', '9'}};
+	if (codes[puzzle][0] == currentlydisplayedpieceofanswer[0] && codes[puzzle][1] == currentlydisplayedpieceofanswer[1] && codes[puzzle][2] == currentlydisplayedpieceofanswer[2] && codes[puzzle][3] == currentlydisplayedpieceofanswer[3]) {
+		Serial.println(codes[puzzle]);
+		Serial.println(currentlydisplayedpieceofanswer);
+		Serial.println(puzzle);
+		if (puzzle >= 3) {
 			// winscreen();
+		} else {
+			informationscreen();
+			puzzle++;
 		}
-		puzzle++;
+
 	} else {
 		penaltyscreen(30 * 1000000);
 
@@ -210,10 +215,13 @@ void drawsetup() {
 	u8g2.drawButtonUTF8(10, 104, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "7" );
 	u8g2.drawButtonUTF8(32, 104, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "8" );
 	u8g2.drawButtonUTF8(54, 104, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "9" );
-	u8g2.drawButtonUTF8(10, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "x" );
-	u8g2.drawButtonUTF8(32, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "0" );
-	u8g2.drawButtonUTF8(54, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "<=" );
-
+	u8g2.setFont(u8g2_font_unifont_t_symbols);
+	u8g2.drawButtonUTF8(10, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "\0x2714");
+	u8g2.setFont(u8g2_font_helvR08_tr);
+	u8g2.drawButtonUTF8(32, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "0");
+	u8g2.setFont(u8g2_font_unifont_t_symbols);
+	u8g2.drawButtonUTF8(54, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "\0x2716");
+	u8g2.setFont(u8g2_font_helvR08_tr);
 	u8g2.sendBuffer();  
 	drawCursor();
 }
@@ -224,7 +232,6 @@ void drawCursor(){
 	u8g2.setDrawColor(1);
 	u8g2.sendBuffer();  
 }
-
 
 void drawtime(){
 	u8g2.setFont(u8g2_font_helvR08_tr);
@@ -243,7 +250,7 @@ void displaycurrentpuzzle(){
 	u8g2.setDrawColor(1);  
 	char t[3];
   t[0] = 'R';
-  t[1] = '0' + puzzle;
+  t[1] = '0' + (puzzle + 1);
   t[2] = '\0';
   u8g2.drawStr(0,15, t);
 	u8g2.sendBuffer(); 
