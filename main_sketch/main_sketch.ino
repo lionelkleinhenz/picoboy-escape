@@ -30,7 +30,8 @@ char currentlydisplayedpieceofanswer[] = {'*','*','*','*'};
 char lockuptable[] = {'1','2','3','4','5','6','7','8','9','q','0','e'};
 int cursorPos;
 int currentdigit=0;
-
+int r = 0;
+char f[5];
 
 void setup() {
 	// put your setup code here, to run once:+ 120000
@@ -48,13 +49,14 @@ void setup() {
 	digitalWrite(LEDY, LOW);
 	digitalWrite(LEDG, LOW);
 
+	puzzle = 0;
 	miss_trys = 0;
 	penalty = 0;
 	code = 0;
-	puzzle = 0;
 	cursorPos = 0;
 	game_start = time_us_64();
 	drawsetup();
+
 
 	// informationscreen(1);
 	// penaltyscreen(30 * 1000000);
@@ -77,9 +79,7 @@ void loop() {
 	
 	delay(500);
 	*/
-	// updateCursor();
 	posUpdate();
-	// updateCursor();
 	delay(200);
 	drawtime();
 	displaycurrentpuzzle();
@@ -104,16 +104,12 @@ void update_leds() {
 	}
 }
 
-bool enter(int code) {
-	int solutions[7] = {234, 573, 827, 983, 073, 937, 897}; 
-	return code == solutions[puzzle];
-}
+
 
 
 
 
 void posUpdate() {
-
 	if (digitalRead(KEY_LEFT) == LOW) {
 		if ((cursorPos / 3) > 0) {
 			drawCursor();
@@ -167,12 +163,9 @@ void posUpdate() {
 			}
 		}
 	}
-
-	// updateCursor();
-	// delay(200);
 }
 void verify(){
-	char codes[][4] = {{'5', '2', '0', '0'}, {'4', '2', '3', '8'}, {'0', '4', '1', '3'}, {'x', 'x', 'x', 'x'}, {'7', '7', '8', '3'}, {'4', '8', '2', '9'}};
+	char codes[][4] = {{'5', '2', '0', '0'}, {'4', '2', '3', '8'}, {'0', '4', '1', '3'}, {'0', '7', '5', '3'}, {'7', '7', '8', '3'}, {'4', '8', '2', '9'}};
 	if (codes[puzzle][0] == currentlydisplayedpieceofanswer[0] && codes[puzzle][1] == currentlydisplayedpieceofanswer[1] && codes[puzzle][2] == currentlydisplayedpieceofanswer[2] && codes[puzzle][3] == currentlydisplayedpieceofanswer[3]) {
 		Serial.println(codes[puzzle]);
 		Serial.println(currentlydisplayedpieceofanswer);
@@ -186,7 +179,6 @@ void verify(){
 
 	} else {
 		penaltyscreen(30 * 1000000);
-
 	}
 }
 
@@ -215,13 +207,9 @@ void drawsetup() {
 	u8g2.drawButtonUTF8(10, 104, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "7" );
 	u8g2.drawButtonUTF8(32, 104, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "8" );
 	u8g2.drawButtonUTF8(54, 104, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "9" );
-	u8g2.setFont(u8g2_font_unifont_t_symbols);
-	u8g2.drawButtonUTF8(10, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "\0x2714");
-	u8g2.setFont(u8g2_font_helvR08_tr);
+	u8g2.drawButtonUTF8(10, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "X");
 	u8g2.drawButtonUTF8(32, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "0");
-	u8g2.setFont(u8g2_font_unifont_t_symbols);
-	u8g2.drawButtonUTF8(54, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "\0x2716");
-	u8g2.setFont(u8g2_font_helvR08_tr);
+	u8g2.drawButtonUTF8(54, 120, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "<=");
 	u8g2.sendBuffer();  
 	drawCursor();
 }
@@ -251,6 +239,7 @@ void displaycurrentpuzzle(){
 	char t[3];
   t[0] = 'R';
   t[1] = '0' + (puzzle + 1);
+  // t[1] = '0' + r;
   t[2] = '\0';
   u8g2.drawStr(0,15, t);
 	u8g2.sendBuffer(); 
@@ -274,7 +263,7 @@ uint64_t time_elapsed(uint64_t start) {
 }
 
 void readable(uint64_t val) {
-	if (val > 3600000000) {
+	if (val > 36000000000) {
 		gameoverscreen();
 	}
 	uint64_t seconds = val / 1000000;
@@ -312,12 +301,31 @@ void readable(uint64_t val) {
 	temp[4] = final[4];
 	Serial.println(temp); // DO NOT REMOVE
 	// Serial.println(final);
-	
+	f[0] = final[0];
+	f[1] = final[1];
+	f[2] = final[2];
+	f[3] = final[3];
+	f[4] = final[4];
   u8g2.drawStr(36, 15, final);
 }
 
-void gameoverscreen() {
+void winscreen(){
+	u8g2.clearBuffer();
+	u8g2.drawStr(0, 50, "GEWONNEN");
+	u8g2.drawStr(10, 60, "Zeit:");
+	
+	u8g2.setFont(u8g2_font_logisoso20_tf);
+	u8g2.drawStr(0 ,90, f);
 
+	u8g2.sendBuffer();
+	while(true){}
+}
+
+void gameoverscreen() {
+	u8g2.clearBuffer();
+	u8g2.drawStr(5, 68, "Gameover");
+	u8g2.sendBuffer();
+	while(true){}
 }
 
 void penaltyscreen(uint64_t penalty) {
