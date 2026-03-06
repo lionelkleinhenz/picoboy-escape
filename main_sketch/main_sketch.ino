@@ -53,9 +53,10 @@ void setup() {
 	miss_trys = 0;
 	penalty = 0;
 	code = 0;
-	cursorPos = 0;
+	cursorPos = 4;
 	game_start = time_us_64();
 	drawsetup();
+	displayactivenumber();
 
 
 	// informationscreen(1);
@@ -73,12 +74,13 @@ void loop() {
 		update_leds();
 	} else {
 		puzzle++;
-	} if (miss_trys == 3) {
-		tone(SPEAKER, 2000, 40);
-	}
+	
 	
 	delay(500);
 	*/
+	if (miss_trys >= 3) {
+		tone(SPEAKER, 2000, 40);
+	}
 	posUpdate();
 	delay(200);
 	drawtime();
@@ -99,7 +101,7 @@ void update_leds() {
 		case 2:
 			digitalWrite(LEDY, HIGH);
 			break;
-		case 3: 
+		default: 
 			digitalWrite(LEDR, HIGH);
 	}
 }
@@ -167,18 +169,27 @@ void posUpdate() {
 void verify(){
 	char codes[][4] = {{'5', '2', '0', '0'}, {'4', '2', '3', '8'}, {'0', '4', '1', '3'}, {'0', '7', '5', '3'}, {'7', '7', '8', '3'}, {'4', '8', '2', '9'}};
 	if (codes[puzzle][0] == currentlydisplayedpieceofanswer[0] && codes[puzzle][1] == currentlydisplayedpieceofanswer[1] && codes[puzzle][2] == currentlydisplayedpieceofanswer[2] && codes[puzzle][3] == currentlydisplayedpieceofanswer[3]) {
-		Serial.println(codes[puzzle]);
-		Serial.println(currentlydisplayedpieceofanswer);
-		Serial.println(puzzle);
-		if (puzzle >= 3) {
-			// winscreen();
+		// Serial.println(codes[puzzle]);
+		// Serial.println(currentlydisplayedpieceofanswer);
+		// Serial.println(puzzle);
+		puzzle++;
+		update_leds();
+		if (puzzle >= 6) {
+			winscreen();
 		} else {
 			informationscreen();
-			puzzle++;
+			
 		}
 
 	} else {
-		penaltyscreen(30 * 1000000);
+		miss_trys++;
+		update_leds();
+		if (miss_trys > 6) {
+			miss_trys = 6;
+		}
+		if (miss_trys > 3) {
+			penaltyscreen((miss_trys - 3) * 30 * 1000000);
+		}
 	}
 }
 
@@ -266,6 +277,7 @@ void readable(uint64_t val) {
 	if (val > 36000000000) {
 		gameoverscreen();
 	}
+	
 	uint64_t seconds = val / 1000000;
 	uint64_t seconds_mod = seconds % 60;
 	uint64_t minutes = seconds / 60;
@@ -311,8 +323,8 @@ void readable(uint64_t val) {
 
 void winscreen(){
 	u8g2.clearBuffer();
-	u8g2.drawStr(0, 50, "GEWONNEN");
-	u8g2.drawStr(10, 60, "Zeit:");
+	u8g2.drawStr(7, 40, "YOU WIN!");
+	u8g2.drawStr(10, 60, "time left:");
 	
 	u8g2.setFont(u8g2_font_logisoso20_tf);
 	u8g2.drawStr(0 ,90, f);
@@ -335,7 +347,7 @@ void penaltyscreen(uint64_t penalty) {
 	uint64_t time = time_elapsed(penalty_start);
 	uint64_t time_remaining = (penalty - time) / 1000000;
 	char rem_penalty_sec[3];
-	rem_penalty_sec[0] = '3';
+	rem_penalty_sec[0] = '0';
 	rem_penalty_sec[1] = '0';
 	rem_penalty_sec[2] = 's';
 	u8g2.setFont(u8g2_font_helvR08_tr);
@@ -354,7 +366,7 @@ void penaltyscreen(uint64_t penalty) {
 			break;
 		}
 		// Serial.println(time_remaining);
-		char rem[2];
+		char rem[90];
 		sprintf(rem, "%llu", time_remaining);
 			if (rem[1] == NULL) {
 				rem_penalty_sec[0] = '0';
@@ -369,6 +381,7 @@ void penaltyscreen(uint64_t penalty) {
 		u8g2.drawStr(10, 80, rem_penalty_sec);
 		u8g2.sendBuffer();
 		delay(200);
+		tone(SPEAKER, 2000, 40);
 	}
 	u8g2.clearBuffer();
 	u8g2.setFont(u8g2_font_helvR08_tr);
@@ -379,12 +392,12 @@ void penaltyscreen(uint64_t penalty) {
 }
 
 void informationscreen() {
-	char rooms[5][5] = {"207", "LIFT", "305", "402", "112"};
+	char rooms[5][5] = {"111", "209", "LIFT", "408", " MB "};
 	u8g2.clearBuffer();
 	u8g2.sendBuffer();
 	u8g2.drawStr(2, 50, "Neuer Raum:");
 	u8g2.setFont(u8g2_font_logisoso16_tf);
-	u8g2.drawStr(16 ,70, rooms[puzzle]);
+	u8g2.drawStr(16 ,70, rooms[puzzle - 1]);
 	u8g2.setFont(u8g2_font_helvR08_tr);
 	u8g2.drawButtonUTF8(32, 90, U8G2_BTN_HCENTER|U8G2_BTN_BW1, 16,  1,  1, "Weiter!");
 	u8g2.setDrawColor(2);
@@ -392,10 +405,13 @@ void informationscreen() {
 	u8g2.setDrawColor(1);
 	u8g2.sendBuffer(); 
 	u8g2.sendBuffer();
+	delay(500);
 	while (true) {
+		tone(SPEAKER, 2000, 40);
 		if (digitalRead(KEY_CENTER) == LOW) {
 			break;
 		}
+		
 	}
 	u8g2.sendBuffer();
 	u8g2.clearBuffer();
